@@ -1,0 +1,4 @@
+/config/dev.json
+/config/prod.json
+/docroot/components
+/vendor/

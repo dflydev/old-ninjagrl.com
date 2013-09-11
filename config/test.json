@@ -1,0 +1,9 @@
+{
+    "session.test": true,
+    "debug": true,
+    "monolog.logfile": "php://memory",
+    "db.options": {
+        "driver": "pdo_sqlite",
+        "memory": true
+    }
+}
