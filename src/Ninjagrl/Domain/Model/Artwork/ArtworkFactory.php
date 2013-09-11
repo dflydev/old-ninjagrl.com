@@ -16,11 +16,12 @@ class ArtworkFactory
     {
         $artworkReflection = new \ReflectionClass("Ninjagrl\Domain\Model\Artwork\Artwork");
 
-        if (PHP_VERSION_ID < 50400) {
+        $isPhp54OrLater = version_compare(PHP_VERSION, '5.4.0', '>=');
+        if ($isPhp54OrLater) {
+            $this->artworkPrototype = $artworkReflection->newInstanceWithoutConstructor();
+        } else {
             $toClass = 'Ninjagrl\Domain\Model\Artwork\Artwork';
             $this->artworkPrototype = unserialize('O:'.strlen($toClass).':"'.$toClass.'":0:{}');
-        } else {
-            $this->artworkPrototype = $artworkReflection->newInstanceWithoutConstructor();
         }
 
         $buildProperty = function ($propertyName) use ($artworkReflection) {
