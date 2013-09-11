@@ -6,30 +6,16 @@ use Ninjagrl\Domain\Model\Artwork\View\ArtworkView;
 use Ninjagrl\Domain\Model\Category\CategoryIdentity;
 use Ninjagrl\Domain\Model\Image\ImageIdentity;
 use Ninjagrl\Domain\Model\Tag\TagIdentity;
+use Ninjagrl\Domain\Shared\PrototypeManager;
 
 class ArtworkFactory
 {
-    private $artworkPrototype;
+    private $prototypeManager;
     private $mappings;
 
-    public function __construct()
+    public function __construct(PrototypeManager $prototypeManager = null)
     {
-        $artworkReflection = new \ReflectionClass("Ninjagrl\Domain\Model\Artwork\Artwork");
-
-        $isPhp54OrLater = version_compare(PHP_VERSION, '5.4.0', '>=');
-        if ($isPhp54OrLater) {
-            $this->artworkPrototype = $artworkReflection->newInstanceWithoutConstructor();
-        } else {
-            $toClass = 'Ninjagrl\Domain\Model\Artwork\Artwork';
-            $this->artworkPrototype = unserialize('O:'.strlen($toClass).':"'.$toClass.'":0:{}');
-        }
-
-        $buildProperty = function ($propertyName) use ($artworkReflection) {
-            $property = $artworkReflection->getProperty($propertyName);
-            $property->setAccessible(true);
-
-            return $property;
-        };
+        $this->prototypeManager = $prototypeManager ?: new PrototypeManager("Ninjagrl\Domain\Model\Artwork\Artwork");
 
         $buildCollection = function ($factory, $value) {
             if (! is_array($value)) {
@@ -50,37 +36,37 @@ class ArtworkFactory
 
         $this->mapping = array(
             'identity' => array(
-                'property' => $buildProperty('identity'),
+                'property' => $this->prototypeManager->buildProperty('identity'),
                 'transformValue' => function ($value) {
                     return new ArtworkIdentity($value);
                 }
             ),
             'title' => array(
-                'property' => $buildProperty('title'),
+                'property' => $this->prototypeManager->buildProperty('title'),
             ),
             'description' => array(
-                'property' => $buildProperty('description'),
+                'property' => $this->prototypeManager->buildProperty('description'),
             ),
             'size' => array(
-                'property' => $buildProperty('size'),
+                'property' => $this->prototypeManager->buildProperty('size'),
             ),
             'medium' => array(
-                'property' => $buildProperty('medium'),
+                'property' => $this->prototypeManager->buildProperty('medium'),
             ),
             'is_available' => array(
-                'property' => $buildProperty('isAvailable'),
+                'property' => $this->prototypeManager->buildProperty('isAvailable'),
             ),
             'purchase_url' => array(
-                'property' => $buildProperty('purchaseUrl'),
+                'property' => $this->prototypeManager->buildProperty('purchaseUrl'),
             ),
             'created' => array(
-                'property' => $buildProperty('created'),
+                'property' => $this->prototypeManager->buildProperty('created'),
                 'transformValue' => function ($value) {
                     return new \DateTime($value);
                 }
             ),
             'category_identities' => array(
-                'property' => $buildProperty('categoryIdentities'),
+                'property' => $this->prototypeManager->buildProperty('categoryIdentities'),
                 'transformValue' => function ($value) use ($buildCollection) {
                     return $buildCollection(function ($identity) {
                         return new CategoryIdentity($identity);
@@ -88,7 +74,7 @@ class ArtworkFactory
                 }
             ),
             'tag_identities' => array(
-                'property' => $buildProperty('tagIdentities'),
+                'property' => $this->prototypeManager->buildProperty('tagIdentities'),
                 'transformValue' => function ($value) use ($buildCollection) {
                     return $buildCollection(function ($identity) {
                         return new TagIdentity($identity);
@@ -96,7 +82,7 @@ class ArtworkFactory
                 }
             ),
             'image_identities' => array(
-                'property' => $buildProperty('imageIdentities'),
+                'property' => $this->prototypeManager->buildProperty('imageIdentities'),
                 'transformValue' => function ($value) use ($buildCollection) {
                     return $buildCollection(function ($identity) {
                         return new ImageIdentity($identity);
@@ -104,7 +90,7 @@ class ArtworkFactory
                 }
             ),
             'primary_image_identity' => array(
-                'property' => $buildProperty('primaryImageIdentity'),
+                'property' => $this->prototypeManager->buildProperty('primaryImageIdentity'),
                 'transformValue' => function ($value) {
                     return new ImageIdentity($value);
                 }
@@ -114,7 +100,7 @@ class ArtworkFactory
 
     public function createFromData(array $data)
     {
-        $artwork = clone($this->artworkPrototype);
+        $artwork = $this->prototypeManager->createClone();
 
         foreach ($this->mapping as $key => $field) {
             if (isset($data[$key])) {
