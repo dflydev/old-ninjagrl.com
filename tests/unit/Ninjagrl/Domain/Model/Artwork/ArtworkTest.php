@@ -101,6 +101,65 @@ class ArtworkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedMedium, $artworkView->medium);
     }
 
+    /**
+     * @test
+     */
+    public function shouldBeUnavailableByDefault()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('artwork-000'));
+
+        $artworkView = $artwork->render(new View\ArtworkView());
+
+        $this->assertFalse($artworkView->isAvailable);
+        $this->assertNull($artworkView->purchaseUrl);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldBeAbleToBeAvailableWithPurchaseUrl()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('artwork-000'));
+
+        $artwork->makeAvailable('http://etsy.com/buy-me');
+
+        $artworkView = $artwork->render(new View\ArtworkView());
+
+        $this->assertTrue($artworkView->isAvailable);
+        $this->assertEquals('http://etsy.com/buy-me', $artworkView->purchaseUrl);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldBeAbleToBeAvailableWithoutPurchaseUrl()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('artwork-000'));
+
+        $artwork->makeAvailable();
+
+        $artworkView = $artwork->render(new View\ArtworkView());
+
+        $this->assertTrue($artworkView->isAvailable);
+        $this->assertNull($artworkView->purchaseUrl);
+    }
+
+    /**
+     * @test
+     */
+    public function shouldNotClearPurchaseUrlWhenMakingUnavailable()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('artwork-000'));
+
+        $artwork->makeAvailable('http://etsy.com/buy-me');
+        $artwork->makeUnavailable();
+
+        $artworkView = $artwork->render(new View\ArtworkView());
+
+        $this->assertFalse($artworkView->isAvailable);
+        $this->assertEquals('http://etsy.com/buy-me', $artworkView->purchaseUrl);
+    }
+
     public function provideSetCategoryIdentities()
     {
         $artwork = new Artwork(new ArtworkIdentity('artwork-000'));
@@ -346,6 +405,7 @@ class ArtworkTest extends \PHPUnit_Framework_TestCase
         $artwork = new Artwork(new ArtworkIdentity('asdf-identity'));
         $artwork->setBasicInformation('Hello World!', 'Description goes here', new \DateTime('2013-09-10'));
         $artwork->setPhysicalDescription('3" x 3"', 'Oil');
+        $artwork->makeAvailable('http://etsy.com/buy-me');
         $artwork->setCategoryIdentities(array(
             new CategoryIdentity('category-000'),
             new CategoryIdentity('category-001'),
@@ -369,6 +429,8 @@ class ArtworkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('Description goes here', $artworkView->description);
         $this->assertEquals('3" x 3"', $artworkView->size);
         $this->assertEquals('Oil', $artworkView->medium);
+        $this->assertTrue($artworkView->isAvailable);
+        $this->assertEquals('http://etsy.com/buy-me', $artworkView->purchaseUrl);
         $this->assertEquals(new \DateTime('2013-09-10'), $artworkView->created);
         $this->assertEquals(array('category-000', 'category-001', 'category-002'), $artworkView->categoryIdentities);
         $this->assertEquals(array('tag-000', 'tag-001', 'tag-002'), $artworkView->tagIdentities);
