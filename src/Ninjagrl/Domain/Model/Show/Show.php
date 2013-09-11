@@ -2,6 +2,7 @@
 
 namespace Ninjagrl\Domain\Model\Show;
 
+use Ninjagrl\Domain\Model\Artwork\Artwork;
 use Ninjagrl\Domain\Model\Show\View\ShowView;
 use Ninjagrl\Domain\Model\Venue\Venue;
 use Ninjagrl\Domain\Model\Venue\Venue\View\VenueView;
