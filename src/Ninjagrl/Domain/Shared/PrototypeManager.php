@@ -11,7 +11,7 @@ class PrototypeManager
     {
         $this->reflectionClass = new \ReflectionClass($class);
 
-        $isPhp54OrLater = version_compare(PHP_VERSION, '5.4.0', '>=');
+        $isPhp54OrLater = PHP_VERSION_ID >= 504000;
         if ($isPhp54OrLater) {
             $this->prototype = $this->reflectionClass->newInstanceWithoutConstructor();
         } else {
