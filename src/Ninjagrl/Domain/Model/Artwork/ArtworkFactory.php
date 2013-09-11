@@ -31,9 +31,9 @@ class ArtworkFactory
             return $property;
         };
 
-        $buildCollection = function ($factory, $value = null) {
-            if (null === $value) {
-                return array();
+        $buildCollection = function ($factory, $value) {
+            if (! is_array($value)) {
+                throw new \InvalidArgumentException("Collection must be an array.");
             }
 
             if (empty($value)) {
@@ -51,17 +51,7 @@ class ArtworkFactory
         $this->mapping = array(
             'identity' => array(
                 'property' => $buildProperty('identity'),
-                'transformValue' => function ($value = null) {
-                    if (null === $value) {
-                        return null;
-                    }
-
-                    return new ArtworkIdentity($value);
-                }
-            ),
-            'title' => array(
-                'property' => $buildProperty('title'),
-                'transformValue' => function ($value = null) {
+                'transformValue' => function ($value) {
                     return new ArtworkIdentity($value);
                 }
             ),
@@ -85,17 +75,13 @@ class ArtworkFactory
             ),
             'created' => array(
                 'property' => $buildProperty('created'),
-                'transformValue' => function ($value = null) {
-                    if (null === $value) {
-                        return null;
-                    }
-
+                'transformValue' => function ($value) {
                     return new \DateTime($value);
                 }
             ),
             'category_identities' => array(
                 'property' => $buildProperty('categoryIdentities'),
-                'transformValue' => function ($value = null) use ($buildCollection) {
+                'transformValue' => function ($value) use ($buildCollection) {
                     return $buildCollection(function ($identity) {
                         return new CategoryIdentity($identity);
                     }, $value);
@@ -103,7 +89,7 @@ class ArtworkFactory
             ),
             'tag_identities' => array(
                 'property' => $buildProperty('tagIdentities'),
-                'transformValue' => function ($value = null) use ($buildCollection) {
+                'transformValue' => function ($value) use ($buildCollection) {
                     return $buildCollection(function ($identity) {
                         return new TagIdentity($identity);
                     }, $value);
@@ -111,7 +97,7 @@ class ArtworkFactory
             ),
             'image_identities' => array(
                 'property' => $buildProperty('imageIdentities'),
-                'transformValue' => function ($value = null) use ($buildCollection) {
+                'transformValue' => function ($value) use ($buildCollection) {
                     return $buildCollection(function ($identity) {
                         return new ImageIdentity($identity);
                     }, $value);
@@ -119,11 +105,7 @@ class ArtworkFactory
             ),
             'primary_image_identity' => array(
                 'property' => $buildProperty('primaryImageIdentity'),
-                'transformValue' => function ($value = null) {
-                    if (null === $value) {
-                        return null;
-                    }
-
+                'transformValue' => function ($value) {
                     return new ImageIdentity($value);
                 }
             ),
@@ -149,6 +131,7 @@ class ArtworkFactory
     public function createFromView(ArtworkView $artworkView)
     {
         $data = array(
+            'identity' => $artworkView->identity,
             'title' => $artworkView->title,
             'description' => $artworkView->description,
             'size' => $artworkView->size,
@@ -157,7 +140,7 @@ class ArtworkFactory
             'purchase_url' => $artworkView->purchaseUrl,
             'category_identities' => $artworkView->categoryIdentities,
             'tag_identities' => $artworkView->tagIdentities,
-            'created' => $artworkView->created ? $artworkView->created->getTimestamp() : null,
+            'created' => $artworkView->created ? $artworkView->created->format('Y-m-d') : null,
             'image_identities' => $artworkView->imageIdentities,
             'primary_image_identity' => $artworkView->primaryImageIdentity,
         );
