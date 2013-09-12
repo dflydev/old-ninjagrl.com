@@ -77,7 +77,7 @@ class ArtworkFactoryTest extends \PHPUnit_Framework_TestCase
             'image-002',
         );
 
-        $artwork = $artworkFactory->createFromView($artworkViewInput);
+        $artwork = $artworkFactory->createFromArtworkView($artworkViewInput);
 
         $artworkView = $artwork->render(new View\ArtworkView());
 

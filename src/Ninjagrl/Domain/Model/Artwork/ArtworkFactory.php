@@ -114,9 +114,19 @@ class ArtworkFactory
         return $artwork;
     }
 
-    public function createFromView(ArtworkView $artworkView)
+    public function createFromArtworkView(ArtworkView $artworkView)
     {
-        $data = array(
+        return $this->createFromData($this->createDataFromArtworkView($artworkView));
+    }
+
+    public function createDataFromArtwork(Artwork $artwork)
+    {
+        return $this->createDataFromArtworkView($artwork->render(new ArtworkView()));
+    }
+
+    public function createDataFromArtworkView(ArtworkView $artworkView)
+    {
+        return array(
             'identity' => $artworkView->identity,
             'title' => $artworkView->title,
             'description' => $artworkView->description,
@@ -130,7 +140,5 @@ class ArtworkFactory
             'image_identities' => $artworkView->imageIdentities,
             'primary_image_identity' => $artworkView->primaryImageIdentity,
         );
-
-        return $this->createFromData($data);
     }
 }
