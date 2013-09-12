@@ -4,7 +4,7 @@ namespace Ninjagrl\Domain\Model\Artwork\View;
 
 class ArtworkView
 {
-    public $identifier;
+    public $identity;
     public $title;
     public $description;
     public $size;
