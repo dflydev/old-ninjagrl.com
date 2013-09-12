@@ -39,8 +39,12 @@ class Location implements ValueObjectInterface
         return $locationView;
     }
 
-    public function sameValueAs($other)
+    public function sameValueAs($other = null)
     {
+        if (null === $other) {
+            return false;
+        }
+
         if ($this === $other) {
             return true;
         }

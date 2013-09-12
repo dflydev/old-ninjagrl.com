@@ -71,8 +71,12 @@ class Show
         return $this->identity;
     }
 
-    public function sameIdentityAs($other)
+    public function sameIdentityAs($other = null)
     {
+        if (null === $other) {
+            return false;
+        }
+
         if ($this === $other) {
             return true;
         }

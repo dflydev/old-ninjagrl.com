@@ -18,8 +18,12 @@ class CategoryIdentity implements ValueObjectInterface
         return $this->identity;
     }
 
-    public function sameValueAs($other)
+    public function sameValueAs($other = null)
     {
+        if (null === $other) {
+            return false;
+        }
+
         if ($this === $other) {
             return true;
         }

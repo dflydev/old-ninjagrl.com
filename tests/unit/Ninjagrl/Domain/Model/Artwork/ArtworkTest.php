@@ -400,6 +400,46 @@ class ArtworkTest extends \PHPUnit_Framework_TestCase
     }
 
     /** @test */
+    public function shouldNotCompareIdentityToNull()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('asdf-identity'));
+
+        $this->assertFalse($artwork->sameIdentityAs(null));
+    }
+
+    /** @test */
+    public function shouldCompareIdentityToSameObject()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('asdf-identity'));
+
+        $this->assertTrue($artwork->sameIdentityAs($artwork));
+    }
+
+    /** @test */
+    public function shouldNotCompareIdentityToDifferentTypeOfObject()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('asdf-identity'));
+
+        $this->assertFalse($artwork->sameIdentityAs($this));
+    }
+
+    /** @test */
+    public function shouldCompareIdentityToDifferentObjectWithSameIdentity()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('asdf-identity'));
+
+        $this->assertTrue($artwork->sameIdentityAs(new Artwork(new ArtworkIdentity('asdf-identity'))));
+    }
+
+    /** @test */
+    public function shouldNotCompareIdentityToDifferentIdentity()
+    {
+        $artwork = new Artwork(new ArtworkIdentity('asdf-identity'));
+
+        $this->assertFalse($artwork->sameIdentityAs(new Artwork(new ArtworkIdentity('foo-identity'))));
+    }
+
+    /** @test */
     public function shouldRender()
     {
         $artwork = new Artwork(new ArtworkIdentity('asdf-identity'));
