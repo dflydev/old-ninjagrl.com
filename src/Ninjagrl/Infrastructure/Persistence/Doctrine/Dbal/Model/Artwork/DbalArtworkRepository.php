@@ -78,12 +78,76 @@ class DbalArtworkRepository implements ArtworkRepositoryInterface
 
     function add(Artwork $artwork)
     {
-        throw new \RuntimeException("Not Implemented");
+        if (isset($this->identityMap[$artwork->identity()->identity()])) {
+            throw new \InvalidArgumentException(
+                "An artwork with this identity already exists in the repository"
+            );
+        }
+
+        $this->identityMap[$artwork->identity()->identity()] = $artwork;
     }
 
     public function flush()
     {
-        throw new \RuntimeException("Not Implemented");
+        foreach ($this->identityMap as $identity => $artwork) {
+            if (isset($this->originalData[$identity])) {
+                $artworkData = $this->updateArtworkIfDirty($artwork);
+            } else {
+                $artworkData = $this->insertArtwork($artwork);
+            }
+            $this->originalData[$identity] = $artworkData;
+        }
+    }
+
+    private function updateArtworkIfDirty(Artwork $artwork)
+    {
+        //
+    }
+
+    private function updateArtwork(Artwork $artwork)
+    {
+        //
+    }
+
+    private function insertArtwork(Artwork $artwork)
+    {
+        $data = $this->artworkFactory->createDataFromArtwork($artwork);
+
+        $artworkData = $data;
+
+        $artworkCategoryIdentities = $artworkData['category_identities'];
+        unset($artworkData['category_identities']);
+
+        $artworkTagIdentities = $artworkData['tag_identities'];
+        unset($artworkData['tag_identities']);
+
+        $artworkImageIdentities = $artworkData['image_identities'];
+        unset($artworkData['image_identities']);
+
+        $this->connection->insert('artwork', $artworkData);
+
+        foreach ($artworkCategoryIdentities as $categoryIdentity) {
+            $this->connection->insert('artwork_category', array(
+                'artwork_identity' => $artworkData['identity'],
+                'category_identity' => $categoryIdentity,
+            ));
+        }
+
+        foreach ($artworkTagIdentities as $tagIdentity) {
+            $this->connection->insert('artwork_tag', array(
+                'artwork_identity' => $artworkData['identity'],
+                'tag_identity' => $tagIdentity,
+            ));
+        }
+
+        foreach ($artworkImageIdentities as $imageIdentity) {
+            $this->connection->insert('artwork_image', array(
+                'artwork_identity' => $artworkData['identity'],
+                'image_identity' => $imageIdentity,
+            ));
+        }
+
+        return $data;
     }
 
     private function rowsToArtwork(array $rows)
@@ -99,9 +163,9 @@ class DbalArtworkRepository implements ArtworkRepositoryInterface
             $groupedRows[$row['identity']][] = $row;
         }
 
-        foreach ($groupedRows as $id => $rows) {
-            if (isset($this->identityMap[$id])) {
-                $artworks[] = $this->identityMap[$id];
+        foreach ($groupedRows as $identity => $rows) {
+            if (isset($this->identityMap[$identity])) {
+                $artworks[] = $this->identityMap[$identity];
 
                 continue;
             }
@@ -138,6 +202,8 @@ class DbalArtworkRepository implements ArtworkRepositoryInterface
             }
 
             $artwork = $this->artworkFactory->createFromData($data);
+
+            $this->originalData[$identity] = $data;
 
             $artworks[] = $this->identityMap[$id] = $artwork;
         }
