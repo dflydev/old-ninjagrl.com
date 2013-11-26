@@ -36,7 +36,6 @@ class DbalArtworkRepository implements ArtworkRepositoryInterface
     private $connection;
     private $artworkFactory;
     private $identityMap = array();
-    private $originalData = array();
 
     public function __construct(Connection $connection, ArtworkFactory $artworkFactory)
     {
